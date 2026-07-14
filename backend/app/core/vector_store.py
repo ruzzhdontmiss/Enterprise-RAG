@@ -24,7 +24,10 @@ class QdrantVectorStore:
     def __init__(self, collection_name: str = "documents") -> None:
         settings = get_settings()
         self.collection_name = collection_name
-        self.client = QdrantClient(url=settings.qdrant_url)
+        self.client = QdrantClient(
+            url=settings.qdrant_url,
+            api_key=settings.qdrant_api_key,
+        )
 
     def _ensure_collection(self) -> None:
         """Create the collection and index on tenant_id if they do not exist.
@@ -100,9 +103,9 @@ class QdrantVectorStore:
             ]
         )
 
-        results = self.client.search(  # type: ignore[attr-defined]
+        response = self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query_vector,
+            query=query_vector,
             query_filter=query_filter,
             limit=limit,
         )
@@ -111,10 +114,10 @@ class QdrantVectorStore:
             {
                 "id": r.id,
                 "score": r.score,
-                "text": r.payload.get("text"),
-                "page_number": r.payload.get("page_number"),
-                "section": r.payload.get("section"),
-                "document_id": r.payload.get("document_id"),
+                "text": r.payload.get("text") if r.payload else None,
+                "page_number": r.payload.get("page_number") if r.payload else None,
+                "section": r.payload.get("section") if r.payload else None,
+                "document_id": r.payload.get("document_id") if r.payload else None,
             }
-            for r in results
+            for r in response.points
         ]

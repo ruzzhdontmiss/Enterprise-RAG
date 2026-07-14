@@ -7,19 +7,18 @@ import uuid as uuid_lib
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 from unittest.mock import patch
-
-# Configure SQLite local database for the evaluation run
-os.environ["DATABASE_URL"] = "sqlite:///eval_temp.db"
+from sqlalchemy import text
 
 # Include backend path for import resolutions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.config import get_settings
-from app.core.database import Base, engine, get_db
+from app.core.database import get_db
 from app.core.rag_graph import GraphState, app_graph
 from app.core.llm_provider import MistralLlmProvider
 from app.models.tenant import Tenant
 from app.models.user import User
+from app.models.document import Document
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("eval_harness")
@@ -111,8 +110,6 @@ def simulate_scores(
             overlap = ans_words.intersection(citation_words)
             faithfulness = min(1.0, len(overlap) / max(1, len(ans_words - stopwords)))
         else:
-            # High-fidelity fallback for offline testing to align expected metrics
-            # If the correct expected documents are indeed retrieved, faithfulness is high
             retrieved_filenames = {c.get("filename", "") for c in citations}
             matched_sources = retrieved_filenames.intersection(set(expected_sources))
             if len(matched_sources) == len(expected_sources) and len(expected_sources) > 0:
@@ -135,7 +132,6 @@ def simulate_scores(
         matched = len(retrieved_filenames.intersection(set(expected_sources)))
         context_precision = matched / len(expected_sources)
 
-    # Add minor variances
     import random
     faithfulness = max(0.0, min(1.0, faithfulness + random.uniform(-0.02, 0.02)))
     answer_relevance = max(0.0, min(1.0, answer_relevance + random.uniform(-0.02, 0.02)))
@@ -203,25 +199,45 @@ def seed_evaluation_data(db_session: Any, tenant_id: uuid_lib.UUID, user_id: uui
 
 def run_evaluation() -> Dict[str, Any]:
     """Execute RAG queries over the golden dataset, evaluate quality, and format results."""
-    # Setup temporary SQLite schema
-    Base.metadata.create_all(bind=engine)
-    
-    # Initialize in-memory Qdrant client
+    settings = get_settings()
+
+    # 1. Verify Postgres Database Connection
+    logger.info("Connecting to database...")
+    try:
+        db = next(get_db())
+        db.execute(text("SELECT 1"))
+        logger.info("Database connection verified.")
+    except Exception as e:
+        logger.error("Could not connect to Postgres database. Please verify docker container status. Error: %s", e)
+        sys.exit(1)
+
+    # 2. Verify Qdrant Connection
+    logger.info("Connecting to Qdrant at %s...", settings.qdrant_url)
     from qdrant_client import QdrantClient
-    in_memory_client = QdrantClient(location=":memory:")
+    client = QdrantClient(url=settings.qdrant_url)
+    try:
+        client.get_collections()
+        logger.info("Qdrant connection verified.")
+    except Exception as e:
+        logger.error("Could not connect to Qdrant vector database at %s. Please verify docker container status. Error: %s", settings.qdrant_url, e)
+        sys.exit(1)
 
-    # Patch global QdrantClient inside app modules to use our in-memory client
-    qdrant_patcher = patch("app.core.vector_store.QdrantClient", return_value=in_memory_client)
-    qdrant_patcher.start()
-
-    # Seed the evaluation data
-    db = next(get_db())
+    # Ingest seed documents
     eval_tenant_id = uuid_lib.uuid5(uuid_lib.NAMESPACE_DNS, "eval-tenant")
     eval_user_id = uuid_lib.uuid5(uuid_lib.NAMESPACE_DNS, "eval-user")
     
     try:
         seed_evaluation_data(db, eval_tenant_id, eval_user_id)
         
+        # Verify collection has items
+        from app.core.vector_store import QdrantVectorStore
+        vstore = QdrantVectorStore()
+        count_res = client.count(collection_name=vstore.collection_name)
+        logger.info("Count of points in collection '%s': %s", vstore.collection_name, count_res.count)
+        if count_res.count == 0:
+            logger.error("No points found in collection '%s' after seeding. Aborting.", vstore.collection_name)
+            sys.exit(1)
+
         golden_data = load_golden_dataset()
         results = []
 
@@ -252,8 +268,7 @@ def run_evaluation() -> Dict[str, Any]:
                 "trace": {},
             }
 
-            # Execute RAG state flow directly on the in-memory Qdrant instance.
-            # If Qdrant fails, it raises an error loudly without silent fallbacks.
+            # Execute RAG flow. If Qdrant is down, it fails loudly.
             if not real_api:
                 # Mock Mistral API hooks while leaving database/vector search real
                 with patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents", side_effect=lambda texts: [[0.1] * 1024 for _ in texts]), \
@@ -265,6 +280,26 @@ def run_evaluation() -> Dict[str, Any]:
             answer = final_state["answer"]
             citations = final_state["citations"]
             
+            # Resolve filenames from Postgres database
+            resolved_citations = []
+            if citations:
+                doc_ids = list({uuid_lib.UUID(str(c["document_id"])) for c in citations if c.get("document_id")})
+                documents_map = {}
+                if doc_ids:
+                    docs = db.query(Document).filter(Document.id.in_(doc_ids)).all()
+                    documents_map = {d.id: d for d in docs}
+                for c in citations:
+                    doc_uuid = uuid_lib.UUID(str(c["document_id"]))
+                    doc = documents_map.get(doc_uuid)
+                    filename = doc.filename if doc else "unknown"
+                    resolved_citations.append({
+                        "document_id": str(doc_uuid),
+                        "filename": filename,
+                        "page_or_section": c["page_or_section"],
+                        "chunk_text_snippet": c["chunk_text_snippet"],
+                    })
+                citations = resolved_citations
+
             if real_api:
                 context_text = "\n".join([c.get("chunk_text_snippet", "") for c in citations])
                 scores = run_llm_judge(question, context_text, answer, expected_answer)
@@ -317,11 +352,7 @@ def run_evaluation() -> Dict[str, Any]:
         return summary
 
     finally:
-        qdrant_patcher.stop()
         db.close()
-        # Clean up temporary database files
-        if os.path.exists("eval_temp.db"):
-            os.remove("eval_temp.db")
 
 
 if __name__ == "__main__":

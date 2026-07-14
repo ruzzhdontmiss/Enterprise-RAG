@@ -28,6 +28,7 @@ class Settings(BaseSettings):
 
     # Qdrant
     qdrant_url: str = Field(default="http://localhost:6333")
+    qdrant_api_key: str | None = Field(default=None)
 
     # Mistral
     mistral_api_key: str = Field(default="")

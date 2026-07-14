@@ -143,11 +143,11 @@ def test_cross_tenant_vector_isolation(
     query_vector = [0.1] * 1024
     store.search_similar(tenant_id=tenant_a_id, query_vector=query_vector, limit=5)
     
-    # Check that search was called on Qdrant client
-    assert mock_qdrant_client.search.called
+    # Check that query_points was called on Qdrant client
+    assert mock_qdrant_client.query_points.called
     
     # Retrieve the filters from the call args
-    call_args = mock_qdrant_client.search.call_args[1]
+    call_args = mock_qdrant_client.query_points.call_args[1]
     query_filter = call_args["query_filter"]
     
     # Verify that the filter restricts strictly to tenant_a_id
