@@ -1,0 +1,3 @@
+All employees must enable multi-factor authentication (MFA) on their accounts.
+Passwords must be at least 16 characters long and changed every 90 days.
+Sharing passwords or MFA tokens with other staff members is strictly prohibited.

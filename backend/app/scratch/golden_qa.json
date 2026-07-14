@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What does the health insurance cover?",
+    "expected_answer_summary": "Employee health insurance covers 100% of dental and vision checkups, with a $10 copay per session for mental health counseling.",
+    "expected_source_chunks": ["benefits.txt"]
+  },
+  {
+    "question": "What is the copay for mental health counseling?",
+    "expected_answer_summary": "$10 per session.",
+    "expected_source_chunks": ["benefits.txt"]
+  },
+  {
+    "question": "What is the policy for booking flights?",
+    "expected_answer_summary": "Standard class flights must be booked at least 14 days in advance.",
+    "expected_source_chunks": ["travel_policy.txt"]
+  },
+  {
+    "question": "How much is reimbursed for meals during business travel?",
+    "expected_answer_summary": "Meals are reimbursed up to $75 per day.",
+    "expected_source_chunks": ["travel_policy.txt"]
+  },
+  {
+    "question": "What are the rules for passwords?",
+    "expected_answer_summary": "Passwords must be at least 16 characters long and changed every 90 days.",
+    "expected_source_chunks": ["it_security.txt"]
+  },
+  {
+    "question": "Is MFA required for employee accounts?",
+    "expected_answer_summary": "Yes, all employees must enable multi-factor authentication (MFA).",
+    "expected_source_chunks": ["it_security.txt"]
+  },
+  {
+    "question": "Can I share my MFA tokens with my team members?",
+    "expected_answer_summary": "No, sharing passwords or MFA tokens with other staff members is strictly prohibited.",
+    "expected_source_chunks": ["it_security.txt"]
+  },
+  {
+    "question": "What is the reimbursement limit for meal expenses?",
+    "expected_answer_summary": "Up to $75 per day.",
+    "expected_source_chunks": ["travel_policy.txt"]
+  },
+  {
+    "question": "What is the policy for company cars?",
+    "expected_answer_summary": "not enough information in the knowledge base",
+    "expected_source_chunks": []
+  },
+  {
+    "question": "Are dental cleanings covered for out-of-network providers?",
+    "expected_answer_summary": "No, they must be booked with an in-network provider to be eligible for full coverage.",
+    "expected_source_chunks": ["benefits.txt"]
+  }
+]
