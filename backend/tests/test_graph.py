@@ -93,7 +93,7 @@ def test_hybrid_search_merges_dense_and_bm25_results(
     assert "rrf_score" in chunks[0]
 
 
-@patch("app.core.reranker.CrossEncoder")
+@patch("sentence_transformers.CrossEncoder")
 def test_rerank_orders_by_relevance(mock_cross_encoder_cls: MagicMock) -> None:
     """Test that the cross-encoder correctly computes and sorts chunks by rerank score."""
     mock_encoder = MagicMock()

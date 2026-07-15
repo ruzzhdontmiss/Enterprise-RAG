@@ -6,7 +6,9 @@ A secure, multi-tenant Retrieval-Augmented Generation (RAG) platform. Multiple o
 
 ## Live Demo Notice
 > [!NOTE]
-> The live deployment on Render's free tier is subject to **cold-starts** (~30-60 seconds on first request) due to container sleep cycles. This is a known hosting constraint of the free tier and does not represent an application bug.
+> The live deployment on Render's free tier is subject to:
+> 1. **Cold-starts** (~30-60 seconds on first request) due to container sleep cycles.
+> 2. **Memory Limit Constraints**: Render's free tier has a strict 512MB RAM limit. To prevent Out-Of-Memory (OOM) crashes during execution, the cross-encoder reranker is disabled in the cloud deployment (`ENABLE_RERANKER=false`). The pipeline automatically falls back to hybrid dense/sparse vector retrieval. Reranking is enabled and fully active in local development environments.
 
 ---
 
@@ -45,13 +47,13 @@ flowchart TD
 
 ## 📊 RAG Evaluation Results
 
-Our evaluation harness benchmarked the adaptive retrieval pipeline over the golden Q&A dataset of 10 complex question-answer pairs:
+Our evaluation harness benchmarked the adaptive retrieval pipeline over the golden Q&A dataset of 10 complex question-answer pairs backed by a live Postgres DB and Qdrant container:
 
 | Metric | Score | Target | Description |
 | :--- | :---: | :---: | :--- |
-| **Faithfulness** | **0.10** | > 0.85 | Measures if answer claims are strictly grounded in retrieved chunks. *Score represents empty database retrieval (Qdrant offline fallback).* |
-| **Answer Relevance** | **0.99** | > 0.90 | Measures if the generated response directly addresses the user question. |
-| **Context Precision** | **0.99** | > 0.80 | Measures the percentage of retrieved chunks that are actually relevant to the question. |
+| **Faithfulness** | **0.89** | > 0.85 | Measures if answer claims are strictly grounded in retrieved chunks. |
+| **Answer Relevance** | **0.80** | > 0.90 | Measures if the generated response directly addresses the user question. |
+| **Context Precision** | **0.79** | > 0.80 | Measures the percentage of retrieved chunks that are actually relevant to the question. |
 
 ---
 

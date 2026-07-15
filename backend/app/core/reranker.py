@@ -1,7 +1,5 @@
 from typing import Any, Dict, List, Optional
 
-from sentence_transformers import CrossEncoder
-
 from app.config import get_settings
 
 
@@ -10,12 +8,13 @@ class BgeReranker:
     def __init__(self, model_name: Optional[str] = None) -> None:
         settings = get_settings()
         self.model_name = model_name or settings.rerank_model_name
-        self._model: Optional[CrossEncoder] = None
+        self._model: Optional[Any] = None
 
     @property
-    def model(self) -> CrossEncoder:
+    def model(self) -> Any:
         """Lazy load the CrossEncoder model to avoid unnecessary memory overhead on imports."""
         if self._model is None:
+            from sentence_transformers import CrossEncoder
             self._model = CrossEncoder(self.model_name)
         assert self._model is not None
         return self._model

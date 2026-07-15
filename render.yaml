@@ -4,7 +4,7 @@ services:
     name: enterprise-rag-backend
     runtime: python
     plan: free
-    buildCommand: "cd backend && pip install --upgrade pip && pip install -e ."
+    buildCommand: "cd backend && pip install --upgrade pip && pip install torch --index-url https://download.pytorch.org/whl/cpu && pip install -e ."
     startCommand: "cd backend && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: DATABASE_URL
@@ -23,6 +23,8 @@ services:
         sync: false
       - key: QDRANT_API_KEY
         sync: false
+      - key: ENABLE_RERANKER
+        value: "false"
 
   # 2. Next.js frontend web service
   - type: web

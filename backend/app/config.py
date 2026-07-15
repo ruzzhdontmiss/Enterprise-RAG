@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = Field(default=60)
 
     # Reranking
+    enable_reranker: bool = Field(default=True)
     rerank_confidence_threshold: float = Field(default=0.4)
     rerank_model_name: str = Field(default="BAAI/bge-reranker-base")
 

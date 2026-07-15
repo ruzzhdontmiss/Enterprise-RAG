@@ -211,6 +211,22 @@ def hybrid_search_node(state: GraphState) -> GraphState:
 @time_node
 def rerank_node(state: GraphState) -> GraphState:
     """Reranks hybrid search results using BgeReranker cross-encoder."""
+    settings = get_settings()
+    if not settings.enable_reranker:
+        # Pass raw chunks through without cross-encoder rerank to avoid OOM
+        reranked = []
+        for c in state["raw_chunks"]:
+            chunk_copy = dict(c)
+            chunk_copy["rerank_score"] = 1.0  # bypass confidence gate
+            reranked.append(chunk_copy)
+        state["reranked_chunks"] = reranked[:5]
+        state["trace"]["rerank"] = {
+            "top_scores": [1.0] * len(state["reranked_chunks"]),
+            "final_count": len(state["reranked_chunks"]),
+            "disabled": True,
+        }
+        return state
+
     reranker = BgeReranker()
     reranked = reranker.rerank(state["search_query"], state["raw_chunks"])
     
