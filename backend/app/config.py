@@ -55,6 +55,23 @@ class Settings(BaseSettings):
     # CORS
     allowed_origins: list[str] = Field(default=["*"])
 
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, v: Any) -> Any:
+        """Parse allowed origins from a comma-separated string, JSON array, or direct list."""
+        if isinstance(v, str):
+            val = v.strip()
+            # If it is formatted as a JSON array, decode it
+            if val.startswith("[") and val.endswith("]"):
+                import json
+                try:
+                    return json.loads(val)
+                except json.JSONDecodeError:
+                    pass
+            # Split by comma
+            return [origin.strip() for origin in val.split(",") if origin.strip()]
+        return v
+
     # Reranking
     enable_reranker: bool = Field(default=True)
     rerank_confidence_threshold: float = Field(default=0.4)

@@ -193,3 +193,24 @@ def test_database_url_prefix_rewrite() -> None:
     # 3. Correct prefix should not change (no-op)
     s3 = Settings(database_url="postgresql+psycopg://db_user:pwd@db_host:5432/db_name")
     assert s3.database_url == "postgresql+psycopg://db_user:pwd@db_host:5432/db_name"
+
+
+def test_allowed_origins_parsing() -> None:
+    """Test that allowed_origins parses list structures, JSON strings, and plain URL strings correctly."""
+    from app.config import Settings
+    
+    # 1. Plain URL string (fromService endpoint reference)
+    s1 = Settings(allowed_origins="https://frontend.com")  # type: ignore[arg-type]
+    assert s1.allowed_origins == ["https://frontend.com"]
+    
+    # 2. Comma-separated strings
+    s2 = Settings(allowed_origins="https://frontend.com, https://admin.com")  # type: ignore[arg-type]
+    assert s2.allowed_origins == ["https://frontend.com", "https://admin.com"]
+    
+    # 3. JSON formatted list
+    s3 = Settings(allowed_origins='["https://frontend.com", "https://admin.com"]')  # type: ignore[arg-type]
+    assert s3.allowed_origins == ["https://frontend.com", "https://admin.com"]
+    
+    # 4. Standard Python list (no-op)
+    s4 = Settings(allowed_origins=["https://frontend.com"])
+    assert s4.allowed_origins == ["https://frontend.com"]
