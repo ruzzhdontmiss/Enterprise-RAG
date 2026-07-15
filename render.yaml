@@ -25,6 +25,11 @@ services:
         sync: false
       - key: ENABLE_RERANKER
         value: "false"
+      - key: ALLOWED_ORIGINS
+        fromService:
+          type: web
+          name: enterprise-rag-frontend
+          property: url
 
   # 2. Next.js frontend web service
   - type: web
@@ -38,7 +43,7 @@ services:
         fromService:
           type: web
           name: enterprise-rag-backend
-          property: host
+          property: url
 
 databases:
   # Managed PostgreSQL DB

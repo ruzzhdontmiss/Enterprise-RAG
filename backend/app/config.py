@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = Field(default="HS256")
     jwt_expire_minutes: int = Field(default=60)
 
+    # CORS
+    allowed_origins: list[str] = Field(default=["*"])
+
     # Reranking
     enable_reranker: bool = Field(default=True)
     rerank_confidence_threshold: float = Field(default=0.4)
