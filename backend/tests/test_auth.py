@@ -176,3 +176,20 @@ def test_role_enforcement(db_session: Session) -> None:
     # Member calls admin-only route
     response_member = client.get("/auth/admin-only", headers=member_headers)
     assert response_member.status_code == 403
+
+
+def test_database_url_prefix_rewrite() -> None:
+    """Test that Settings database_url validator rewrites driver scheme prefixes correctly."""
+    from app.config import Settings
+    
+    # 1. postgresql:// prefix should rewrite
+    s1 = Settings(database_url="postgresql://db_user:pwd@db_host:5432/db_name")
+    assert s1.database_url == "postgresql+psycopg://db_user:pwd@db_host:5432/db_name"
+    
+    # 2. postgres:// prefix should rewrite
+    s2 = Settings(database_url="postgres://db_user:pwd@db_host:5432/db_name")
+    assert s2.database_url == "postgresql+psycopg://db_user:pwd@db_host:5432/db_name"
+    
+    # 3. Correct prefix should not change (no-op)
+    s3 = Settings(database_url="postgresql+psycopg://db_user:pwd@db_host:5432/db_name")
+    assert s3.database_url == "postgresql+psycopg://db_user:pwd@db_host:5432/db_name"

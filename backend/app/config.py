@@ -5,8 +5,9 @@ this file should read os.environ directly.
 """
 
 from functools import lru_cache
+from typing import Any
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,6 +26,17 @@ class Settings(BaseSettings):
     database_url: str = Field(
         default="postgresql+psycopg://enterprise_rag:changeme@localhost:5432/enterprise_rag"
     )
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def rewrite_postgres_driver(cls, v: Any) -> Any:
+        """Rewrite database url scheme to enforce psycopg (v3) driver connection."""
+        if isinstance(v, str):
+            if v.startswith("postgresql://") and not v.startswith("postgresql+psycopg://"):
+                return v.replace("postgresql://", "postgresql+psycopg://", 1)
+            elif v.startswith("postgres://") and not v.startswith("postgres+psycopg://"):
+                return v.replace("postgres://", "postgresql+psycopg://", 1)
+        return v
 
     # Qdrant
     qdrant_url: str = Field(default="http://localhost:6333")
