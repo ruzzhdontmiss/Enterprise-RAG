@@ -100,3 +100,13 @@ Certain complex features were intentionally kept out-of-scope to manage latency 
   ```bash
   python scripts/run_eval.py
   ```
+
+---
+
+## 🛠️ Lessons Learned: Production Deployment
+
+During the Render deployment, we resolved several edge cases critical to robust multi-tier hosting:
+- **psycopg2 vs psycopg3 Mismatch**: Render's auto-provisioned PostgreSQL databases expose connection URLs prefixed with `postgresql://`, which SQLAlchemy strictly maps to the older `psycopg2` driver. Since we rely on the modern `psycopg` (v3) binary, we implemented a Pydantic runtime validator to gracefully rewrite the scheme to `postgresql+psycopg://` at backend initialization without modifying the immutable host variables.
+- **Eager Model Loading (OOMs)**: Instantiating large transformers (like `BgeReranker`) globally at import time caused immediate out-of-memory crashes on Render's 512MB limit. We resolved this by pushing model instantiation into lazy initialization inside the request handler, paired with swapping to the CPU-only PyTorch wheel and a dynamic `ENABLE_RERANKER` flag to safely bypass memory-heavy nodes in cloud environments.
+- **Production CORS Configuration**: Render injects frontend origins dynamically. Relying on strict JSON array parsing for the `ALLOWED_ORIGINS` environment variable caused startup validation crashes when Render passed raw URL strings. We introduced a robust custom Pydantic parser that gracefully handles plain strings, comma-separated lists, and JSON arrays securely.
+- **Next.js Static Caching & Blueprint Parsing**: Next.js bakes `NEXT_PUBLIC_` environment variables into its JS bundles at build time. Render's blueprint `fromService` references can resolve to bare internal hostnames instead of the full public URL, breaking relative browser routing. We addressed this by implementing a unified API client wrapper that guarantees an `https://` protocol prefix on all requests, combined with explicitly clearing the `.next` build cache on Render to force Next.js to ingest the fresh deployment variables.
