@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface User {
@@ -21,13 +21,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    // Attempt memory sync or initial state loading
-    setLoading(false);
-  }, []);
 
   const login = (jwtToken: string, email: string, role: string) => {
     setToken(jwtToken);

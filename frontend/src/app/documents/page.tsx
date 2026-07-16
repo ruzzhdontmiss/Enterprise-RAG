@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { getApiUrl } from "@/lib/api";
 import { Upload, FileText, ArrowLeft, RefreshCw, AlertCircle, CheckCircle } from "lucide-react";
 
 interface Document {
@@ -24,9 +25,8 @@ export default function DocumentsPage() {
 
   const fetchDocuments = useCallback(async () => {
     if (!token) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     try {
-      const res = await fetch(`${apiUrl}/documents`, {
+      const res = await fetch(getApiUrl("/documents"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) {
@@ -47,6 +47,7 @@ export default function DocumentsPage() {
     if (!token) {
       router.push("/auth/login");
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchDocuments();
     }
   }, [token, router, fetchDocuments]);
@@ -73,10 +74,8 @@ export default function DocumentsPage() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
     try {
-      const res = await fetch(`${apiUrl}/documents/upload`, {
+      const res = await fetch(getApiUrl("/documents/upload"), {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -88,8 +87,8 @@ export default function DocumentsPage() {
       }
 
       await fetchDocuments();
-    } catch (err: any) {
-      setError(err.message || "An error occurred during file upload.");
+    } catch (err) {
+      setError((err as Error).message || "An error occurred during file upload.");
     } finally {
       setUploading(false);
     }

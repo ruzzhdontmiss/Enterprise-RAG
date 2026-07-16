@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { getApiUrl } from "@/lib/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,10 +17,8 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
     try {
-      const res = await fetch(`${apiUrl}/auth/login`, {
+      const res = await fetch(getApiUrl("/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -43,8 +42,8 @@ export default function LoginPage() {
       const role = payloadDecoded.role || "member";
       
       login(token, email, role);
-    } catch (err: any) {
-      setError(err.message || "An error occurred during authentication.");
+    } catch (err) {
+      setError((err as Error).message || "An error occurred during authentication.");
     } finally {
       setLoading(false);
     }

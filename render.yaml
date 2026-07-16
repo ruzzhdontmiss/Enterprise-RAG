@@ -37,7 +37,7 @@ services:
     runtime: node
     plan: free
     buildCommand: "cd frontend && npm install && npm run build"
-    startCommand: "cd frontend && npm run start"
+    startCommand: "cd frontend && npx next start -p $PORT"
     envVars:
       - key: NEXT_PUBLIC_API_URL
         fromService:

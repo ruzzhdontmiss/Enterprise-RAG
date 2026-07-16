@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Send, FileText, LogOut, ArrowRight, User as UserIcon } from "lucide-react";
+import { getApiUrl } from "@/lib/api";
 
 interface Citation {
   document_id: string;
@@ -53,10 +54,8 @@ export default function ChatPage() {
     // Append loading bubble
     setMessages([...updatedMessages, { role: "assistant", content: "", loading: true }]);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
     try {
-      const res = await fetch(`${apiUrl}/query`, {
+      const res = await fetch(getApiUrl("/query"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,7 +84,7 @@ export default function ChatPage() {
           citations: data.citations || [],
         },
       ]);
-    } catch (err: any) {
+    } catch {
       setMessages([
         ...updatedMessages,
         {

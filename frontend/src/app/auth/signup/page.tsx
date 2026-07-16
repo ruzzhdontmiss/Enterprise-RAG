@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { getApiUrl } from "@/lib/api";
 
 export default function SignupPage() {
   const [tenantName, setTenantName] = useState("");
@@ -11,7 +11,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const { login } = useAuth();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -19,10 +18,8 @@ export default function SignupPage() {
     setError("");
     setLoading(true);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
     try {
-      const res = await fetch(`${apiUrl}/auth/signup`, {
+      const res = await fetch(getApiUrl("/auth/signup"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,8 +37,8 @@ export default function SignupPage() {
       const data = await res.json();
       // Auto-login on successful signup
       login(data.access_token, data.user.email, data.user.role);
-    } catch (err: any) {
-      setError(err.message || "An error occurred during registration.");
+    } catch (err) {
+      setError((err as Error).message || "An error occurred during registration.");
     } finally {
       setLoading(false);
     }
