@@ -39,11 +39,10 @@ services:
     buildCommand: "cd frontend && npm install && npm run build"
     startCommand: "cd frontend && npx next start -p $PORT"
     envVars:
+      # Hardcoded instead of using fromService because Render's blueprint resolution
+      # failed to output the full public URL, returning the bare internal hostname.
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: enterprise-rag-backend
-          property: url
+        value: "https://enterprise-rag-backend-fiob.onrender.com"
 
 databases:
   # Managed PostgreSQL DB
