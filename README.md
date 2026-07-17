@@ -4,11 +4,20 @@ A secure, multi-tenant Retrieval-Augmented Generation (RAG) platform. Multiple o
 
 ---
 
-## Live Demo Notice
+## 🚀 Demo
+
+![EnterpriseRAG Demo](docs/screenshots/demo.gif)
+
+> **Live Demo**: [https://enterprise-rag-frontend-fiob.onrender.com](https://enterprise-rag-frontend-fiob.onrender.com)
+> 
 > [!NOTE]
-> The live deployment on Render's free tier is subject to:
-> 1. **Cold-starts** (~30-60 seconds on first request) due to container sleep cycles.
-> 2. **Memory Limit Constraints**: Render's free tier has a strict 512MB RAM limit. To prevent Out-Of-Memory (OOM) crashes during execution, the cross-encoder reranker is disabled in the cloud deployment (`ENABLE_RERANKER=false`). The pipeline automatically falls back to hybrid dense/sparse vector retrieval. Reranking is enabled and fully active in local development environments.
+> The live deployment on Render's free tier is subject to **cold-starts** (~30-60 seconds on first request) due to container sleep cycles. Render's free tier also has a strict 512MB RAM limit, so the cross-encoder reranker is disabled in the cloud deployment (`ENABLE_RERANKER=false`). The pipeline automatically falls back to hybrid dense/sparse vector retrieval. Reranking is fully active locally.
+
+### Screenshots
+
+| Sign Up & Onboarding | Chat with Citations | Knowledge Base Uploads |
+| :---: | :---: | :---: |
+| ![Signup](docs/screenshots/signup.png) | ![Chat](docs/screenshots/chat-with-citations.png) | ![Upload](docs/screenshots/upload-status.png) |
 
 ---
 
