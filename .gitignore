@@ -32,3 +32,6 @@ yarn-error.log*
 # OS
 .DS_Store
 Thumbs.db
+DEPLOY.md
+rules.md
+AGENTS.md
