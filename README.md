@@ -10,6 +10,7 @@ A secure, multi-tenant Retrieval-Augmented Generation (RAG) platform. Multiple o
 
 **Live Demo**: [https://enterprise-rag-frontend-8miq.onrender.com](https://enterprise-rag-frontend-8miq.onrender.com)
 
+
 > [!NOTE]
 > The live deployment on Render's free tier is subject to **cold-starts** (~30-60 seconds on first request) due to container sleep cycles. Render's free tier also has a strict 512MB RAM limit, so the cross-encoder reranker is disabled in the cloud deployment (`ENABLE_RERANKER=false`). The pipeline automatically falls back to hybrid dense/sparse vector retrieval. Reranking is fully active locally.
 
