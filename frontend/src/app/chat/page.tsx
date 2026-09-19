@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Send, FileText, LogOut, ArrowRight, User as UserIcon } from "lucide-react";
 import { getApiUrl } from "@/lib/api";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
 interface Citation {
   document_id: string;
@@ -55,7 +56,7 @@ export default function ChatPage() {
     setMessages([...updatedMessages, { role: "assistant", content: "", loading: true }]);
 
     try {
-      const res = await fetch(getApiUrl("/query"), {
+      const res = await fetchWithTimeout(getApiUrl("/query"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

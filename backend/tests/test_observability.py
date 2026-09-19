@@ -12,7 +12,7 @@ from app.core.auth import create_access_token
 client = TestClient(app)
 
 
-@patch("app.core.reranker.BgeReranker.rerank")
+@patch("app.core.reranker.CohereReranker.rerank")
 @patch("qdrant_client.QdrantClient.scroll")
 @patch("app.core.llm_provider.MistralLlmProvider.generate_answer")
 @patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents")
@@ -68,7 +68,7 @@ def test_trace_written_on_every_query(
     assert "rewrite_query" in trace.latency_ms_per_node
 
 
-@patch("app.core.reranker.BgeReranker.rerank")
+@patch("app.core.reranker.CohereReranker.rerank")
 @patch("qdrant_client.QdrantClient.scroll")
 @patch("app.core.llm_provider.MistralLlmProvider.generate_answer")
 @patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents")
@@ -179,7 +179,7 @@ def test_trace_is_tenant_scoped_and_admin_only(
     assert res.json()["question"] == "Question B"
 
 
-@patch("app.core.reranker.BgeReranker.rerank")
+@patch("app.core.reranker.CohereReranker.rerank")
 @patch("qdrant_client.QdrantClient.scroll")
 @patch("app.core.llm_provider.MistralLlmProvider.generate_answer")
 @patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents")
@@ -232,7 +232,7 @@ def test_trace_includes_reretrieval_flag_when_triggered(
     assert traces[0].reretrieval_triggered is True
 
 
-@patch("app.core.reranker.BgeReranker.rerank")
+@patch("app.core.reranker.CohereReranker.rerank")
 @patch("qdrant_client.QdrantClient.scroll")
 @patch("app.core.llm_provider.MistralLlmProvider.generate_answer")
 @patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents")

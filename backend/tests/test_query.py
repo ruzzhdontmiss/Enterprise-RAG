@@ -13,7 +13,7 @@ from app.core.auth import create_access_token
 client = TestClient(app)
 
 
-@patch("app.core.reranker.BgeReranker.rerank")
+@patch("app.core.reranker.CohereReranker.rerank")
 @patch("qdrant_client.QdrantClient.scroll")
 @patch("app.core.llm_provider.MistralLlmProvider.generate_answer")
 @patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents")
@@ -93,7 +93,7 @@ def test_query_returns_citations_from_retrieved_chunks(
     assert citations[0]["chunk_text_snippet"] == "The standard policy allows up to 25 vacation days."
 
 
-@patch("app.core.reranker.BgeReranker.rerank")
+@patch("app.core.reranker.CohereReranker.rerank")
 @patch("qdrant_client.QdrantClient.scroll")
 @patch("app.core.llm_provider.MistralLlmProvider.generate_answer")
 @patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents")
@@ -155,7 +155,7 @@ def test_query_with_no_matching_chunks_returns_no_info_response(
     assert mock_generate.call_count == 1
 
 
-@patch("app.core.reranker.BgeReranker.rerank")
+@patch("app.core.reranker.CohereReranker.rerank")
 @patch("qdrant_client.QdrantClient.scroll")
 @patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents")
 @patch("app.core.vector_store.QdrantVectorStore.search_similar")
@@ -200,7 +200,7 @@ def test_query_is_tenant_scoped(
     assert call_args["tenant_id"] != tenant_b.id
 
 
-@patch("app.core.reranker.BgeReranker.rerank")
+@patch("app.core.reranker.CohereReranker.rerank")
 @patch("qdrant_client.QdrantClient.scroll")
 @patch("app.core.llm_provider.MistralLlmProvider.generate_answer")
 @patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents")
@@ -251,7 +251,7 @@ def test_chat_message_persisted_with_correct_tenant_id(
     assert msg.citations_json == []
 
 
-@patch("app.core.reranker.BgeReranker.rerank")
+@patch("app.core.reranker.CohereReranker.rerank")
 @patch("qdrant_client.QdrantClient.scroll")
 @patch("app.core.llm_provider.MistralLlmProvider.generate_answer")
 @patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents")

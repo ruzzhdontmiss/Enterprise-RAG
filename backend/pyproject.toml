@@ -20,8 +20,7 @@ dependencies = [
     "python-docx>=1.1.0",
     "langgraph>=0.1",
     "rank-bm25>=0.2",
-    "sentence-transformers>=3.0",
-    "torch>=2.0",
+    "cohere>=5.0",
 ]
 
 [project.optional-dependencies]

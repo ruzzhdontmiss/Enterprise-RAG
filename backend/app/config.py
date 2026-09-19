@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     mistral_generation_model: str = Field(default="mistral-small-latest")
     mistral_embed_model: str = Field(default="mistral-embed")
 
+    # Cohere
+    cohere_api_key: str = Field(default="")
+
     # Auth
     jwt_secret: str = Field(default="dev-secret-change-me")
     jwt_algorithm: str = Field(default="HS256")
@@ -75,7 +78,7 @@ class Settings(BaseSettings):
     # Reranking
     enable_reranker: bool = Field(default=True)
     rerank_confidence_threshold: float = Field(default=0.4)
-    rerank_model_name: str = Field(default="BAAI/bge-reranker-base")
+    rerank_model_name: str = Field(default="rerank-english-v3.0")
 
     @property
     def is_local(self) -> bool:

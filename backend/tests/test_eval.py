@@ -12,7 +12,7 @@ def test_eval_script_runs_against_seed_dataset_without_error(mock_api_check: Mag
     with patch("app.core.vector_store.QdrantVectorStore.search_similar", return_value=[]), \
          patch("qdrant_client.QdrantClient.scroll", return_value=([], None)), \
          patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents", return_value=[[0.1]*1024]), \
-         patch("app.core.reranker.BgeReranker.rerank", side_effect=lambda q, ch: ch), \
+         patch("app.core.reranker.CohereReranker.rerank", side_effect=lambda q, ch: ch), \
          patch("app.core.llm_provider.MistralLlmProvider.generate_answer", return_value="not enough information"):
          
         summary = run_evaluation()
@@ -30,7 +30,7 @@ def test_eval_scores_are_in_valid_range(mock_api_check: MagicMock) -> None:
     with patch("app.core.vector_store.QdrantVectorStore.search_similar", return_value=[]), \
          patch("qdrant_client.QdrantClient.scroll", return_value=([], None)), \
          patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents", return_value=[[0.1]*1024]), \
-         patch("app.core.reranker.BgeReranker.rerank", side_effect=lambda q, ch: ch), \
+         patch("app.core.reranker.CohereReranker.rerank", side_effect=lambda q, ch: ch), \
          patch("app.core.llm_provider.MistralLlmProvider.generate_answer", return_value="not enough information"):
          
         summary = run_evaluation()
@@ -53,7 +53,7 @@ def test_results_file_written_with_expected_schema(mock_api_check: MagicMock) ->
     with patch("app.core.vector_store.QdrantVectorStore.search_similar", return_value=[]), \
          patch("qdrant_client.QdrantClient.scroll", return_value=([], None)), \
          patch("app.core.llm_provider.MistralEmbeddingProvider.embed_documents", return_value=[[0.1]*1024]), \
-         patch("app.core.reranker.BgeReranker.rerank", side_effect=lambda q, ch: ch), \
+         patch("app.core.reranker.CohereReranker.rerank", side_effect=lambda q, ch: ch), \
          patch("app.core.llm_provider.MistralLlmProvider.generate_answer", return_value="not enough information"):
          
         summary = run_evaluation()

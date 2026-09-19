@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
 export default function SignupPage() {
   const [tenantName, setTenantName] = useState("");
@@ -19,7 +20,7 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(getApiUrl("/auth/signup"), {
+      const res = await fetchWithTimeout(getApiUrl("/auth/signup"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

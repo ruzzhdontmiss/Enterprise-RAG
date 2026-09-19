@@ -93,15 +93,20 @@ def test_hybrid_search_merges_dense_and_bm25_results(
     assert "rrf_score" in chunks[0]
 
 
-@patch("sentence_transformers.CrossEncoder")
-def test_rerank_orders_by_relevance(mock_cross_encoder_cls: MagicMock) -> None:
+@patch("cohere.Client")
+def test_rerank_orders_by_relevance(mock_cohere_client_cls: MagicMock) -> None:
     """Test that the cross-encoder correctly computes and sorts chunks by rerank score."""
-    mock_encoder = MagicMock()
-    mock_cross_encoder_cls.return_value = mock_encoder
+    mock_client = MagicMock()
+    mock_cohere_client_cls.return_value = mock_client
     
-    # Mock predict returns score for each (query, chunk) pair
+    # Mock rerank returns score for each (query, chunk) pair
+    mock_response = MagicMock()
     # Let's say chunk B (index 1) gets a higher score than chunk A (index 0)
-    mock_encoder.predict.return_value = [0.1, 0.95]
+    mock_response.results = [
+        MagicMock(index=0, relevance_score=0.1),
+        MagicMock(index=1, relevance_score=0.95)
+    ]
+    mock_client.rerank.return_value = mock_response
     
     state = GraphState(
         question="How many vacation days?",

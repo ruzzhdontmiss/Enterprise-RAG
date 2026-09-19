@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import { Upload, FileText, ArrowLeft, RefreshCw, AlertCircle, CheckCircle } from "lucide-react";
 
 interface Document {
@@ -26,7 +27,7 @@ export default function DocumentsPage() {
   const fetchDocuments = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch(getApiUrl("/documents"), {
+      const res = await fetchWithTimeout(getApiUrl("/documents"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) {
@@ -75,7 +76,7 @@ export default function DocumentsPage() {
     formData.append("file", file);
 
     try {
-      const res = await fetch(getApiUrl("/documents/upload"), {
+      const res = await fetchWithTimeout(getApiUrl("/documents/upload"), {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(getApiUrl("/auth/login"), {
+      const res = await fetchWithTimeout(getApiUrl("/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -38,7 +39,10 @@ export default function LoginPage() {
         throw new Error("Invalid token payload structure.");
       }
       
-      const payloadDecoded = JSON.parse(atob(parts[1]));
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const pad = base64.length % 4;
+      const paddedBase64 = pad ? base64 + '='.repeat(4 - pad) : base64;
+      const payloadDecoded = JSON.parse(atob(paddedBase64));
       const role = payloadDecoded.role || "member";
       
       login(token, email, role);

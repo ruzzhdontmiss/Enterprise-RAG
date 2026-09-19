@@ -7,7 +7,7 @@ from langgraph.graph import END, StateGraph
 
 from app.config import get_settings
 from app.core.llm_provider import MistralEmbeddingProvider, MistralLlmProvider
-from app.core.reranker import BgeReranker
+from app.core.reranker import CohereReranker
 from app.core.vector_store import QdrantVectorStore
 
 
@@ -210,7 +210,7 @@ def hybrid_search_node(state: GraphState) -> GraphState:
 
 @time_node
 def rerank_node(state: GraphState) -> GraphState:
-    """Reranks hybrid search results using BgeReranker cross-encoder."""
+    """Reranks hybrid search results using CohereReranker."""
     settings = get_settings()
     if not settings.enable_reranker:
         # Pass raw chunks through without cross-encoder rerank to avoid OOM
@@ -227,7 +227,7 @@ def rerank_node(state: GraphState) -> GraphState:
         }
         return state
 
-    reranker = BgeReranker()
+    reranker = CohereReranker()
     reranked = reranker.rerank(state["search_query"], state["raw_chunks"])
     
     # Cap to top 5 reranked results
