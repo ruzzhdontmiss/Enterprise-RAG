@@ -26,10 +26,7 @@ services:
       - key: ENABLE_RERANKER
         value: "false"
       - key: ALLOWED_ORIGINS
-        fromService:
-          type: web
-          name: enterprise-rag-frontend
-          property: url
+        value: "https://enterprise-rag-frontend-8miq.onrender.com"
 
   # 2. Next.js frontend web service
   - type: web
