@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = Field(default=60)
 
     # CORS
-    allowed_origins: list[str] = Field(default=["*"])
+    allowed_origins: str | list[str] = Field(default=["*"])
 
     @field_validator("allowed_origins", mode="before")
     @classmethod
